@@ -6,11 +6,6 @@
   "logo": "https://raw.githubusercontent.com/tuck1s/sparkpost-traffic-gen/master/SparkPost_App-Icon_180x180.png",
   "website": "https://developers.sparkpost.com",
   "keywords": ["python", "SparkPost"],
-  "buildpacks": [
-    {
-      "url": "https://github.com/heroku/heroku-buildpack-python"
-    }
-  ],
   "env": {
     "SPARKPOST_HOST": {
       "description": "The URL of the SparkPost API service you're using. Defaults to https://api.sparkpost.com",
