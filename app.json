@@ -1,0 +1,28 @@
+{
+  "name": "SparkPost traffic generator",
+  "description": "Traffic generator service that can be deployed on Heroku",
+  "image": "heroku/python",
+  "repository": "https://github.com/tuck1s/sparkpost-traffic-gen.git",
+  "logo": "https://github.com/tuck1s/hello-python-heroku/blob/master/SparkPost_App-Icon_180x180.png",
+  "website": "https://developers.sparkpost.com",
+  "keywords": ["python", "SparkPost"],
+  "env": {
+    "SPARKPOST_HOST": {
+      "description": "The URL of the SparkPost API service you're using. Defaults to https://api.sparkpost.com",
+      "value": "https://api.sparkpost.com",
+      "required": false
+    },
+    "SPARKPOST_API_KEY": {
+      "description": "API key on your SparkPost account, with transmission rights",
+      "required": true
+    },
+    "MESSAGES_PER_MINUTE": {
+      "description": "Messages to be sent per minute, from 1 to 10000",
+      "required": true
+    },
+    "FROM_EMAIL": {
+      "description": "FROM address belonging to a valid sending domain on your account.  e.g. fred@example.com",
+      "required": true
+    }
+  }
+}
