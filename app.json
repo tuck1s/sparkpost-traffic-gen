@@ -3,7 +3,7 @@
   "description": "Traffic generator service that can be deployed on Heroku",
   "image": "heroku/python",
   "repository": "https://github.com/tuck1s/sparkpost-traffic-gen.git",
-  "logo": "https://github.com/tuck1s/hello-python-heroku/blob/master/SparkPost_App-Icon_180x180.png",
+  "logo": "https://github.com/tuck1s/sparkpost-traffic-gen/blob/master/SparkPost_App-Icon_180x180.png",
   "website": "https://developers.sparkpost.com",
   "keywords": ["python", "SparkPost"],
   "env": {
