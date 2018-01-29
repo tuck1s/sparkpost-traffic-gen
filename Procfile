@@ -1,1 +1,1 @@
-web: python sparkpost-traffic-gen.py
+web: python3 sparkpost-traffic-gen.py
