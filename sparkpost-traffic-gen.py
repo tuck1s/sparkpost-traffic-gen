@@ -20,62 +20,42 @@ recipDomains = [
     "mx2.deadboltemail.com",
     "mx2.deadboltemail.com",
     "mx2.deadboltemail.com",
-    "mx2.deadboltemail.com",
-    "mx2.deadboltemail.com",
-    "mx2.deadboltemail.com",
-    "mx2.deadboltemail.com",
+
     "eastmail.independentbeers.com",
     "eastmail.independentbeers.com",
     "eastmail.independentbeers.com",
     "eastmail.independentbeers.com",
     "eastmail.independentbeers.com",
     "eastmail.independentbeers.com",
-    "eastmail.independentbeers.com",
-    "eastmail.independentbeers.com",
-    "eastmail.independentbeers.com",
-    "eastmail.independentbeers.com",
+
     "spin.vinylverb.com",
     "spin.vinylverb.com",
     "spin.vinylverb.com",
     "spin.vinylverb.com",
     "spin.vinylverb.com",
     "spin.vinylverb.com",
-    "spin.vinylverb.com",
-    "spin.vinylverb.com",
-    "spin.vinylverb.com",
-    "spin.vinylverb.com",
+
     "server.talonphotography.com",
     "server.talonphotography.com",
     "server.talonphotography.com",
     "server.talonphotography.com",
     "server.talonphotography.com",
     "server.talonphotography.com",
-    "server.talonphotography.com",
-    "server.talonphotography.com",
-    "server.talonphotography.com",
-    "server.talonphotography.com",
+
     "incoming.bloggersofbeer.com",
     "incoming.bloggersofbeer.com",
     "incoming.bloggersofbeer.com",
     "incoming.bloggersofbeer.com",
     "incoming.bloggersofbeer.com",
     "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
+
     "db.deadboltinternet.com",
     "db.deadboltinternet.com",
     "db.deadboltinternet.com",
     "db.deadboltinternet.com",
     "db.deadboltinternet.com",
     "db.deadboltinternet.com",
-    "db.deadboltinternet.com",
-    "db.deadboltinternet.com",
-    "db.deadboltinternet.com",
-    "db.deadboltinternet.com",
+
     "tech.bloggersoftechnology.com"                         # This domain will ALWAYS bounce as it has no MX .. include it much less often
 ]
 
@@ -96,6 +76,8 @@ content = [
 ToAddrPrefix = 'fakespark+'                         # prefix - random digits are appended to this
 ToName = 'Fake Spark'
 
+sendInterval = 5                                    # minutes
+
 # -----------------------------------------------------------------------------------------
 
 def randomRecip():
@@ -114,9 +96,15 @@ def randomRecip():
     }
     return recip
 
+#
+# Now include the link only sometimes .. so that the destination can't always click
 def randomContents():
     c = random.choice(content)
-    htmlBody = 'Click <a href="http://127.0.0.1/blank.html" data-msys-linkname="' + c['linkname'] + '">' + htmlLink + '</a>'
+    x = random.random()
+    if  x <= 0.4:                      # equivalent to X percent of opens get clicked
+        htmlBody = 'Click <a href="http://127.0.0.1/blank.html" data-msys-linkname="' + c['linkname'] + '">' + htmlLink + '</a>'
+    else:
+        htmlBody = 'Just plain text in this one, so it cannot be clicked'
     return c['campaign'], c['subject'], htmlBody
 
 # Inject the messages into SparkPost for a batch of recipients, using the specified transmission parameters
@@ -171,7 +159,6 @@ if fromEmail == None:
 
 sp = SparkPost(api_key = apiKey, base_uri = host)
 print('Opened connection to', host)
-sendInterval = 5                                    # minutes
 while(True):
     campaign, subject, htmlBody = randomContents()
     txObj = {
@@ -190,5 +177,6 @@ while(True):
     batchSize = int( (0.25 + (0.75 * random.random())) * sendInterval * count)
     for i in range(0, batchSize):
         recipients.append(randomRecip())
+        #recipients.append('bob.lumreeker@gmail.com')                    # debug
     sendToRecips(sp, recipients, txObj)
     time.sleep(60*sendInterval)
