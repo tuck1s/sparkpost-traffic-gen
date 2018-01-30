@@ -177,7 +177,7 @@ for i in range(0, batchSize):
     if host != 'https://api.sparkpost.com':
         txObj.update( { 'metadata': { 'binding': 'outbound' } } )
     recipients = []
-    #recipients.append(randomRecip())
-    recipients.append('bob.lumreeker@gmail.com')                    # debug
+    recipients.append(randomRecip())
+    #recipients.append('bob.lumreeker@gmail.com')                    # debug
     sendToRecips(sp, recipients, txObj)
 print('Done')
