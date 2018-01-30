@@ -76,7 +76,7 @@ content = [
 ToAddrPrefix = 'fakespark+'                         # prefix - random digits are appended to this
 ToName = 'Fake Spark'
 
-sendInterval = 5                                    # minutes
+sendInterval = 10                                   # minutes - tuned to suit Heroku dyno scheduler
 
 # -----------------------------------------------------------------------------------------
 
@@ -159,7 +159,11 @@ if fromEmail == None:
 
 sp = SparkPost(api_key = apiKey, base_uri = host)
 print('Opened connection to', host)
-while(True):
+
+# Send every n minutes, between fractional and full traffic rate
+# rearranged to use single-recipient REST and vary the body contents each time
+batchSize = int( (0.25 + (0.75 * random.random())) * sendInterval * count)
+for i in range(0, batchSize):
     campaign, subject, htmlBody = randomContents()
     txObj = {
         'text': 'hello world',
@@ -173,10 +177,7 @@ while(True):
     if host != 'https://api.sparkpost.com':
         txObj.update( { 'metadata': { 'binding': 'outbound' } } )
     recipients = []
-    # Send every n minutes, somewhere between half and full traffic rate
-    batchSize = int( (0.25 + (0.75 * random.random())) * sendInterval * count)
-    for i in range(0, batchSize):
-        recipients.append(randomRecip())
-        #recipients.append('bob.lumreeker@gmail.com')                    # debug
+    #recipients.append(randomRecip())
+    recipients.append('bob.lumreeker@gmail.com')                    # debug
     sendToRecips(sp, recipients, txObj)
-    time.sleep(60*sendInterval)
+print('Done')
