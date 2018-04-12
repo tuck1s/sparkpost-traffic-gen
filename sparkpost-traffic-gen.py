@@ -14,55 +14,15 @@ from sparkpost.exceptions import SparkPostAPIException
 # Configurable recipient domains, recipient substitution data, html clickable link, campaign, subject etc
 # -----------------------------------------------------------------------------------------
 recipDomains = [
-    "mx2.deadboltemail.com",
-    "mx2.deadboltemail.com",
-    "mx2.deadboltemail.com",
-    "mx2.deadboltemail.com",
-    "mx2.deadboltemail.com",
-    "mx2.deadboltemail.com",
-
-    "eastmail.independentbeers.com",
-    "eastmail.independentbeers.com",
-    "eastmail.independentbeers.com",
-    "eastmail.independentbeers.com",
-    "eastmail.independentbeers.com",
-    "eastmail.independentbeers.com",
-
-    "spin.vinylverb.com",
-    "spin.vinylverb.com",
-    "spin.vinylverb.com",
-    "spin.vinylverb.com",
-    "spin.vinylverb.com",
-    "spin.vinylverb.com",
-
-    "server.talonphotography.com",
-    "server.talonphotography.com",
-    "server.talonphotography.com",
-    "server.talonphotography.com",
-    "server.talonphotography.com",
-    "server.talonphotography.com",
-
-    "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
-    "incoming.bloggersofbeer.com",
-
-    "db.deadboltinternet.com",
-    "db.deadboltinternet.com",
-    "db.deadboltinternet.com",
-    "db.deadboltinternet.com",
-    "db.deadboltinternet.com",
-    "db.deadboltinternet.com",
-
-    "tech.bloggersoftechnology.com"                         # This domain will ALWAYS bounce as it has no MX .. include it much less often
+    "clicky-sink.trymsys.net",
+    # "bouncy-sink.trymsys.net"
+    #"db.deadboltinternet.com"
 ]
 
 recipCities = ["Baltimore", "Boston", "London", "New York", "Paris", "Rio de Janeiro", "Seattle", "Sydney", "Tokyo" ]
 recipGenders = ["female", "male"]
 
-htmlLink = 'http://talonphotography.com/blank.html'
+htmlLink = 'http://example.com/index.html'
 
 content = [
     {'campaign': 'sparkpost-traffic-gen Todays_Sales', 'subject': 'Today\'s sales', 'linkname': 'Deal of the Day'},
@@ -73,15 +33,15 @@ content = [
     {'campaign': 'sparkpost-traffic-gen Holiday_Bargains', 'subject': 'Holiday bargains', 'linkname': 'Holiday Bargains'}
 ]
 
-ToAddrPrefix = 'fakespark+'                         # prefix - random digits are appended to this
-ToName = 'Fake Spark'
+ToAddrPrefix = 'fakespark+'                          # prefix - random digits are appended to this.  Scott's script needs this prefix
+ToName = 'traffic-generator'
 
 sendInterval = 10                                   # minutes - tuned to suit Heroku dyno scheduler
 
 # -----------------------------------------------------------------------------------------
 
 def randomRecip():
-    numDigits = 15                                  # Number of random local-part digits to generate
+    numDigits = 20                                  # Number of random local-part digits to generate
     localpartnum = random.randrange(0, 10**numDigits)
     domain = random.choice(recipDomains)
     # Pad the number out to a fixed length of digits
@@ -97,14 +57,10 @@ def randomRecip():
     return recip
 
 #
-# Now include the link only sometimes .. so that the destination can't always click
+# Contents include a valid http(s) link with custom link name
 def randomContents():
     c = random.choice(content)
-    x = random.random()
-    if  x <= 0.4:                      # equivalent to X percent of opens get clicked
-        htmlBody = 'Click <a href="http://127.0.0.1/blank.html" data-msys-linkname="' + c['linkname'] + '">' + htmlLink + '</a>'
-    else:
-        htmlBody = 'Just plain text in this one, so it cannot be clicked'
+    htmlBody = 'Click <a href="'+htmlLink+'" data-msys-linkname="' + c['linkname'] + '">' + htmlLink + '</a>'
     return c['campaign'], c['subject'], htmlBody
 
 # Inject the messages into SparkPost for a batch of recipients, using the specified transmission parameters
@@ -161,9 +117,12 @@ sp = SparkPost(api_key = apiKey, base_uri = host)
 print('Opened connection to', host)
 
 # Send every n minutes, between fractional and full traffic rate
-# rearranged to use single-recipient REST and vary the body contents each time
-batchSize = int( (0.25 + (0.75 * random.random())) * sendInterval * count)
+batchSize = 100 # int( (0.25 + (0.75 * random.random())) * sendInterval * count)
+recipients = []
 for i in range(0, batchSize):
+    recipients.append(randomRecip())
+
+for i in [1]:
     campaign, subject, htmlBody = randomContents()
     txObj = {
         'text': 'hello world',
@@ -174,10 +133,8 @@ for i in range(0, batchSize):
         'track_clicks': True,
         'from_email': fromEmail,
     }
-    if host != 'https://api.sparkpost.com':
-        txObj.update( { 'metadata': { 'binding': 'outbound' } } )
-    recipients = []
-    recipients.append(randomRecip())
-    #recipients.append('bob.lumreeker@gmail.com')                    # debug
+    if host.endswith('e.sparkpost.com'):            # Workaround for SPE demo system
+        rp = 'bounces@' + fromEmail.split('@')[1]
+        txObj.update( { 'ip_pool': 'outbound', 'return_path': rp } )
     sendToRecips(sp, recipients, txObj)
 print('Done')
