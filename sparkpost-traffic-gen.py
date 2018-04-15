@@ -14,9 +14,15 @@ from sparkpost.exceptions import SparkPostAPIException
 # Configurable recipient domains, recipient substitution data, html clickable link, campaign, subject etc
 # -----------------------------------------------------------------------------------------
 recipDomains = [
-    "clicky-sink.trymsys.net",
-    # "bouncy-sink.trymsys.net"
-    #"db.deadboltinternet.com"
+    "bouncy-sink.trymsys.net",
+    "not-gmail.com.bouncy-sink.trymsys.net",
+    "not-yahoo.com.bouncy-sink.trymsys.net",
+    "not-yahoo.co.uk.bouncy-sink.trymsys.net",
+    "not-hotmail.com.bouncy-sink.trymsys.net",
+    "not-hotmail.co.uk.bouncy-sink.trymsys.net",
+    "not-aol.com.bouncy-sink.trymsys.net",
+    "not-orange.fr.bouncy-sink.trymsys.net",
+    "not-mail.ru.bouncy-sink.trymsys.net",
 ]
 
 recipCities = ["Baltimore", "Boston", "London", "New York", "Paris", "Rio de Janeiro", "Seattle", "Sydney", "Tokyo" ]
@@ -117,7 +123,7 @@ sp = SparkPost(api_key = apiKey, base_uri = host)
 print('Opened connection to', host)
 
 # Send every n minutes, between fractional and full traffic rate
-batchSize = 100 # int( (0.25 + (0.75 * random.random())) * sendInterval * count)
+batchSize = int( (0.25 + (0.75 * random.random())) * sendInterval * count)
 recipients = []
 for i in range(0, batchSize):
     recipients.append(randomRecip())
