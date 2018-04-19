@@ -21,8 +21,12 @@
       "description": "API key on your SparkPost account, with transmission rights",
       "required": true
     },
-    "MESSAGES_PER_MINUTE": {
-      "description": "Messages to be sent per minute, from 1 to 10000",
+    "MESSAGES_PER_MINUTE_LOW": {
+      "description": "Lowest number of messages to be sent per minute, from 0 to 10000",
+      "required": true
+    },
+    "MESSAGES_PER_MINUTE_HIGH": {
+      "description": "Highest number of messages to be sent per minute, from 0 to 10000",
       "required": true
     },
     "FROM_EMAIL": {
