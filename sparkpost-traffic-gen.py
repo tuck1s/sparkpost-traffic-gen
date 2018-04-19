@@ -9,12 +9,13 @@ import random, os, time
 from sparkpost import SparkPost
 from sparkpost.exceptions import SparkPostAPIException
 
-
 # -----------------------------------------------------------------------------------------
 # Configurable recipient domains, recipient substitution data, html clickable link, campaign, subject etc
 # -----------------------------------------------------------------------------------------
 recipDomains = [
-    "bouncy-sink.trymsys.net",
+    #"fbl.bouncy-sink.trymsys.net",
+    #"oob.bouncy-sink.trymsys.net",
+    #"openclick.bouncy-sink.trymsys.net",
     "not-gmail.com.bouncy-sink.trymsys.net",
     "not-yahoo.com.bouncy-sink.trymsys.net",
     "not-yahoo.co.uk.bouncy-sink.trymsys.net",
@@ -39,10 +40,10 @@ content = [
     {'campaign': 'sparkpost-traffic-gen Holiday_Bargains', 'subject': 'Holiday bargains', 'linkname': 'Holiday Bargains'}
 ]
 
-ToAddrPrefix = 'fakespark+'                          # prefix - random digits are appended to this.  Scott's script needs this prefix
+ToAddrPrefix = 'fakespark+'                         # prefix - random digits are appended to this
 ToName = 'traffic-generator'
-
 sendInterval = 10                                   # minutes - tuned to suit Heroku dyno scheduler
+batchSize = 2000                                    # efficient transmission API call batch size
 
 # -----------------------------------------------------------------------------------------
 
@@ -89,18 +90,43 @@ def sendToRecips(sp, recipBatch, sendObj):
         print('error code', err.status, ':', err.errors)
         exit(1)
 
+def sendRandomCampaign(sp, recipients):
+    campaign, subject, htmlBody = randomContents()
+    txObj = {
+        'text': 'hello world',
+        'html': htmlBody,
+        'subject': subject,
+        'campaign': campaign,
+        'track_opens':  True,
+        'track_clicks': True,
+        'from_email': fromEmail,
+    }
+    if 'api.e.sparkpost.com' in sp.base_uri:                       # SPE demo system needs named ip_pool
+        rp = 'bounces@' + fromEmail.split('@')[1]
+        txObj.update( { 'ip_pool': 'outbound', 'return_path': rp } )
+    sendToRecips(sp, recipients, txObj)
 
 # -----------------------------------------------------------------------------------------
 # Main code
 # -----------------------------------------------------------------------------------------
-count = os.getenv('MESSAGES_PER_MINUTE', '1')
-if count.isnumeric():
-    count = int(count)
-    if count <1 or count > 10000:
-        print('Invalid MESSAGES_PER_MINUTE setting - must be number 1 to 10000')
+msgPerMinLow = os.getenv('MESSAGES_PER_MINUTE_LOW', '')
+if msgPerMinLow.isnumeric():
+    msgPerMinLow = int(msgPerMinLow)
+    if msgPerMinLow < 0 or msgPerMinLow > 10000:
+        print('Invalid MESSAGES_PER_MINUTE_LOW setting - must be number 1 to 10000')
         exit(1)
 else:
-    print('Invalid MESSAGES_PER_MINUTE setting - must be number 1 to 10000')
+    print('Invalid MESSAGES_PER_MINUTE_LOW setting - must be number 1 to 10000')
+    exit(1)
+
+msgPerMinHigh = os.getenv('MESSAGES_PER_MINUTE_HIGH', '')
+if msgPerMinHigh.isnumeric():
+    msgPerMinHigh = int(msgPerMinHigh)
+    if msgPerMinHigh < 0 or msgPerMinHigh > 10000:
+        print('Invalid MESSAGES_PER_MINUTE_HIGH setting - must be number 1 to 10000')
+        exit(1)
+else:
+    print('Invalid MESSAGES_PER_MINUTE_HIGH setting - must be number 1 to 10000')
     exit(1)
 
 apiKey = os.getenv('SPARKPOST_API_KEY')        # API key is mandatory
@@ -119,28 +145,18 @@ if fromEmail == None:
     print('FROM_EMAIL environment variable not set - stopping.')
     exit(1)
 
+# Send every n minutes, between low and high traffic rate
+thisRunSize = int(random.uniform(msgPerMinLow * sendInterval, msgPerMinHigh * sendInterval))
+
 sp = SparkPost(api_key = apiKey, base_uri = host)
-print('Opened connection to', host)
+print('Opened connection to', host + '\t', thisRunSize, 'recipients:')
 
-# Send every n minutes, between fractional and full traffic rate
-batchSize = int( (0.25 + (0.75 * random.random())) * sendInterval * count)
 recipients = []
-for i in range(0, batchSize):
+for i in range(0, thisRunSize):
     recipients.append(randomRecip())
-
-for i in [1]:
-    campaign, subject, htmlBody = randomContents()
-    txObj = {
-        'text': 'hello world',
-        'html': htmlBody,
-        'subject': subject,
-        'campaign': campaign,
-        'track_opens':  True,
-        'track_clicks': True,
-        'from_email': fromEmail,
-    }
-    if host.endswith('e.sparkpost.com'):            # Workaround for SPE demo system
-        rp = 'bounces@' + fromEmail.split('@')[1]
-        txObj.update( { 'ip_pool': 'outbound', 'return_path': rp } )
-    sendToRecips(sp, recipients, txObj)
+    if len(recipients) >= batchSize:
+        sendRandomCampaign(sp, recipients)
+        recipients=[]
+if len(recipients) > 0:                         # Send residual batch
+    sendRandomCampaign(sp, recipients)
 print('Done')
