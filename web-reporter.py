@@ -23,11 +23,12 @@ Next send at:
 @app.route('/', defaults={'path': ''}, methods=['GET'])
 def handle_all(path):
     print(request.method, path)
+    r = redis.Redis()
     c = r.incr('mycounter')
     r.set('config', json.dumps(config) )
     qstr = r.get('config')
     q = json.loads(qstr)
-    return 'All OK here, thanks: '+str(c)
+    return 'All OK here, thanks: '+str(c)+q
 
 # Start the app
 if __name__ == "__main__":
