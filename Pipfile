@@ -10,6 +10,7 @@ name = "pypi"
 sparkpost = "==1.3.5"
 flask = "*"
 gunicorn = "*"
+redis = "*"
 
 [dev-packages]
 

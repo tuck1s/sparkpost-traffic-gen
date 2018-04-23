@@ -26,10 +26,5 @@ FROM_EMAIL
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-- Go to Manage App / Add Ons.  Search for scheduler, choose Heroku Scheduler.  Provision / Free.
-
-- Click next to clock icon.  Add New Job.  Type `./sparkpost-traffic-gen.py`
-
-- Choose Schedule Every 10 Minutes.  Next due time is displayed.
-
-- To monitor, go to App Settings / More / View Log file.
+- Messages are sent every minute (no longer using Heroku 10-minute scheduler)
+- To monitor, go to App Settings / More / View Log file
