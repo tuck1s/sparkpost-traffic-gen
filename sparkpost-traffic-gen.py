@@ -5,6 +5,8 @@
 #
 # Configurable traffic volume per minute
 #
+# Can be run periodically via Heroku Scheduler on free dynos
+#
 import random, os, time
 from sparkpost import SparkPost
 from sparkpost.exceptions import SparkPostAPIException
@@ -42,7 +44,7 @@ content = [
 
 ToAddrPrefix = 'fakespark+'                         # prefix - random digits are appended to this
 ToName = 'traffic-generator'
-sendInterval = 1                                    # minutes - now using sleep() again
+sendInterval = 10                                   # minutes
 batchSize = 2000                                    # efficient transmission API call batch size
 
 # -----------------------------------------------------------------------------------------
@@ -107,6 +109,7 @@ def sendRandomCampaign(sp, recipients):
 # -----------------------------------------------------------------------------------------
 # Main code
 # -----------------------------------------------------------------------------------------
+
 msgPerMinLow = os.getenv('MESSAGES_PER_MINUTE_LOW', '')
 if msgPerMinLow.isnumeric():
     msgPerMinLow = int(msgPerMinLow)
@@ -146,21 +149,18 @@ if fromEmail == None:
 sp = SparkPost(api_key = apiKey, base_uri = host)
 print('Opened connection to', host)
 
-while True:
-    startTime = time.time()                                         # measure run time
-    # Send every n minutes, between low and high traffic rate
-    thisRunSize = int(random.uniform(msgPerMinLow * sendInterval, msgPerMinHigh * sendInterval))
-    print('Sending to', thisRunSize, 'recipients')
-    recipients = []
-    for i in range(0, thisRunSize):
-        recipients.append(randomRecip())
-        if len(recipients) >= batchSize:
-            sendRandomCampaign(sp, recipients)
-            recipients=[]
-    if len(recipients) > 0:                         # Send residual batch
+startTime = time.time()                                         # measure run time
+# Send every n minutes, between low and high traffic rate
+thisRunSize = int(random.uniform(msgPerMinLow * sendInterval, msgPerMinHigh * sendInterval))
+print('Sending to', thisRunSize, 'recipients')
+recipients = []
+for i in range(0, thisRunSize):
+    recipients.append(randomRecip())
+    if len(recipients) >= batchSize:
         sendRandomCampaign(sp, recipients)
-    endTime = time.time()
-    runTime = endTime - startTime
-    sleepTime = max(0, 60 * sendInterval - runTime)
-    print('Done in {0:.1f}s.  Next send in {1:.1f}s'.format(runTime, sleepTime))
-    time.sleep(sleepTime)
+        recipients=[]
+if len(recipients) > 0:                         # Send residual batch
+    sendRandomCampaign(sp, recipients)
+endTime = time.time()
+runTime = endTime - startTime
+print('Done in {0:.1f}s.'.format(runTime))
