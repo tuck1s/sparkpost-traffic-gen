@@ -23,15 +23,13 @@ Next send at:
 @app.route('/', defaults={'path': ''}, methods=['GET'])
 def handle_all(path):
     print(request.method, path)
-    r = redis.Redis()
-    c = r.incr('mycounter')
-    r.set('config', json.dumps(config) )
-    qstr = r.get('config')
-    q = json.loads(qstr)
-    return 'All OK here, thanks: '+str(c)+q
+    #r = redis.Redis()
+    #c = r.incr('mycounter')
+    #r.set('config', json.dumps(config) )
+    #qstr = r.get('config')
+    #q = json.loads(qstr)
+    return 'All OK here, thanks: '
 
 # Start the app
 if __name__ == "__main__":
-    r = redis.Redis()
-    r.set('mycounter', 0)
     app.run(debug=True)                         # Permit Pycharm IDE debugging
