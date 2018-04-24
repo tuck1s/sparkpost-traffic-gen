@@ -37,6 +37,5 @@
   "addons": [
     "scheduler",
     "heroku-redis"
-    }
   ]
 }
