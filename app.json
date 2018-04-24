@@ -35,13 +35,8 @@
     }
   },
   "addons": [
-    "scheduler":
-    {
-      "plan": "scheduler:standard"
-    },
-    "heroku-redis":
-    {
-      "plan": "hobby-dev"
+    "scheduler",
+    "heroku-redis"
     }
   ]
 }
