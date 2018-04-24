@@ -33,5 +33,15 @@
       "description": "FROM address belonging to a valid sending domain on your account.  e.g. fred@example.com",
       "required": true
     }
-  }
+  },
+  "addons": [
+    "scheduler",
+    {
+      "plan": "scheduler:standard"
+    },
+    "heroku-redis",
+    {
+      "plan": "hobby-dev"
+    }
+  ]
 }
