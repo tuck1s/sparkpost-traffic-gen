@@ -1,9 +1,11 @@
+import glob
+
 import redis, json, platform
 from flask import Flask, make_response, render_template
 app = Flask(__name__)
+resultsFile = 'results.json'
 
 def getResults():
-    resultsFile = 'results.json'
     try:
         with open(resultsFile) as fIn:
             return json.load(fIn)
@@ -23,11 +25,19 @@ def status_json():
     flaskRes.headers['Content-Type'] = 'application/json'
     return flaskRes
 
-import os
+import os, subprocess
 @app.route('/test', methods=['GET'])
 def status_test():
     f = os.getcwd()
-    return f
+    l = subprocess.run(['ls', '-l'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    l = l.replace('\n', '<br>\n')
+    try:
+        with open(resultsFile) as fIn:
+            t = fIn.read()
+    except Exception as e:
+        t = str(e)
+
+    return '<pre>' + f + '<br><br>' + l + '<br><br>' + t + '</pre>'
 
 # Start the app
 if __name__ == "__main__":
