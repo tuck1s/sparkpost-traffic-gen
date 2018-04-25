@@ -32,8 +32,8 @@ def status_test():
     l = subprocess.run(['ls', '-l'], stdout=subprocess.PIPE).stdout.decode('utf-8')
     l = l.replace('\n', '<br>\n')
     try:
-        with open(resultsFile) as fIn:
-            t = fIn.read()
+        with app.open_resource(resultsFile) as fIn:
+            t = fIn.read().decode('utf-8')
     except Exception as e:
         t = str(e)
 
