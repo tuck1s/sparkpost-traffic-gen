@@ -8,7 +8,7 @@ def getResults():
         with open(resultsFile) as fIn:
             return json.load(fIn)
     except:
-        return ['Not yet running']
+        return {'startedRunning': 'Not yet - check your Heroku Scheduler is set up'}
 
 # Flask entry points
 @app.route('/', methods=['GET'])
