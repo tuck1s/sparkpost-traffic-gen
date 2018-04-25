@@ -35,9 +35,9 @@ This app formerly used `time.sleep()` for built-in scheduling, but that doesn't 
 Heroku's [free dyno hours](https://devcenter.heroku.com/articles/free-dyno-hours#consuming-hours) allowance.
 The worker-thread gets killed by Heroku after 30 minutes.
 
-Instead, use the built-in Heroku Scheduler:
+Instead, this project installs the addon [Heroku Scheduler](https://devcenter.heroku.com/articles/scheduler), but you
+need to manually configure it:
 
-- Go to Manage App / Add Ons.  Search for scheduler, choose Heroku Scheduler.  Provision / Free.
 - Click next to clock icon.  Add New Job.  In command box, type `./sparkpost-traffic-gen.py`
 - Choose Schedule Every 10 Minutes.  Next due time is displayed.
 - To monitor, go to App Settings / More / View Log file

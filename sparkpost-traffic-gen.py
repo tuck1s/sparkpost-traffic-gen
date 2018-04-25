@@ -7,9 +7,10 @@
 #
 # Can be run periodically via Heroku Scheduler on free dynos
 #
-import random, os, time
+import random, os, time, json
 from sparkpost import SparkPost
 from sparkpost.exceptions import SparkPostAPIException
+from datetime import datetime, timezone
 
 # -----------------------------------------------------------------------------------------
 # Configurable recipient domains, recipient substitution data, html clickable link, campaign, subject etc
@@ -46,7 +47,7 @@ ToAddrPrefix = 'fakespark+'                         # prefix - random digits are
 ToName = 'traffic-generator'
 sendInterval = 10                                   # minutes
 batchSize = 2000                                    # efficient transmission API call batch size
-
+resultsFile = 'results.json'
 # -----------------------------------------------------------------------------------------
 def randomRecip():
     numDigits = 20                                  # Number of random local-part digits to generate
@@ -73,7 +74,6 @@ def randomContents():
 # Inject the messages into SparkPost for a batch of recipients, using the specified transmission parameters
 def sendToRecips(sp, recipBatch, sendObj):
     print('  To', str(len(recipBatch)).rjust(5, ' '),'recipients | campaign "'+sendObj['campaign']+'" | ', end='', flush=True)
-
     # Compose in additional API-call parameters
     sendObj.update({
         'recipients': recipBatch,
@@ -86,9 +86,10 @@ def sendToRecips(sp, recipBatch, sendObj):
             print(res)
         else:
             print('OK - in', round(endT - startT, 3), 'seconds')
+        return res['total_accepted_recipients']
     except SparkPostAPIException as err:
         print('error code', err.status, ':', err.errors)
-        exit(1)
+        return 0
 
 def sendRandomCampaign(sp, recipients):
     campaign, subject, htmlBody = randomContents()
@@ -104,7 +105,11 @@ def sendRandomCampaign(sp, recipients):
     if 'api.e.sparkpost.com' in sp.base_uri:                       # SPE demo system needs named ip_pool
         rp = 'bounces@' + fromEmail.split('@')[1]
         txObj.update( { 'ip_pool': 'outbound', 'return_path': rp } )
-    sendToRecips(sp, recipients, txObj)
+    return sendToRecips(sp, recipients, txObj)
+
+def timeStr(t):
+    utc = datetime.fromtimestamp(t, timezone.utc)
+    return datetime.isoformat(utc, sep='T', timespec='seconds')
 
 # -----------------------------------------------------------------------------------------
 # Main code
@@ -150,17 +155,40 @@ sp = SparkPost(api_key = apiKey, base_uri = host)
 print('Opened connection to', host)
 
 startTime = time.time()                                         # measure run time
+
+try:
+    with open(resultsFile) as fIn:
+        res = json.load(fIn)                                    # read back results from previous run (if any)
+except:
+    res = {
+        'startedRunning': timeStr(startTime),
+        'totalSentVolume': 0
+    }
+
 # Send every n minutes, between low and high traffic rate
 thisRunSize = int(random.uniform(msgPerMinLow * sendInterval, msgPerMinHigh * sendInterval))
 print('Sending to', thisRunSize, 'recipients')
 recipients = []
+countSent = 0
 for i in range(0, thisRunSize):
     recipients.append(randomRecip())
     if len(recipients) >= batchSize:
-        sendRandomCampaign(sp, recipients)
+        countSent += sendRandomCampaign(sp, recipients)
         recipients=[]
 if len(recipients) > 0:                         # Send residual batch
-    sendRandomCampaign(sp, recipients)
+    countSent += sendRandomCampaign(sp, recipients)
+
+# write out results
 endTime = time.time()
 runTime = endTime - startTime
 print('Done in {0:.1f}s.'.format(runTime))
+res.update( {
+    'lastRunTime': timeStr(startTime),
+    'lastRunDuration': round(runTime, 3),
+    'lastRunSize': thisRunSize,
+    'lastRunSent': countSent,
+    'nextRunTime': timeStr(startTime + 60 *sendInterval)
+})
+res['totalSentVolume'] += thisRunSize
+with open(resultsFile, 'w') as fOut:
+    json.dump(res, fOut)

@@ -1,35 +1,29 @@
-import redis, json
-from flask import Flask, request
+import redis, json, platform
+from flask import Flask, make_response, render_template
 app = Flask(__name__)
 
-config = {
-    'toAddr': '',
-    'fromAddr': '',
-    'msgPerMinLow': 0,
-    'msgPerMinHigh': 0
-}
+def getResults():
+    resultsFile = 'results.json'
+    try:
+        with open(resultsFile) as fIn:
+            return json.load(fIn)
+    except:
+        return 'Not yet running'
 
-'''
-Statistics
-Started running:
-Total sent volume
-Most recent sent: in x seconds
-Next send at:
-'''
-
-#
 # Flask entry points
-#
-@app.route('/', defaults={'path': ''}, methods=['GET'])
-def handle_all(path):
-    print(request.method, path)
-    #r = redis.Redis()
-    #c = r.incr('mycounter')
-    #r.set('config', json.dumps(config) )
-    #qstr = r.get('config')
-    #q = json.loads(qstr)
-    return 'All OK here, thanks: '
+@app.route('/', methods=['GET'])
+def status_html():
+    r = getResults()
+    return render_template('index.html', **r, name='fred')
+
+# This entry point returns JSON-format report on the traffic generator
+@app.route('/json', methods=['GET'])
+def status_json():
+    flaskRes = make_response(json.dumps(getResults()))
+    flaskRes.headers['Content-Type'] = 'application/json'
+    return flaskRes
 
 # Start the app
 if __name__ == "__main__":
-    app.run(debug=True)                         # Permit Pycharm IDE debugging
+    app.run()
+

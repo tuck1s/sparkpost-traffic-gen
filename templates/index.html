@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table {
+    border-collapse: collapse;
+    width: 800px;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {background-color: #f2f2f2;}
+
+body { font-family: arial; }
+h1 { font-family: arial; }
+</style>
+</head>
+
+
+<table class="TFtable">
+<tr>
+    <th>SparkPost Traffic Generator</th>
+    <th align="right"><img src="https://raw.githubusercontent.com/tuck1s/sparkpost-traffic-gen/master/SparkPost_App-Icon_180x180.png" alt="SparkPost app icon" width="60" height="60" caption="false" /></th>
+</tr>
+<tr> <td>Started running</td> <td>{{startedRunning}}</td></tr>
+<tr> <td>Total sent volume</td> <td>{{totalSentVolume}}</td></tr>
+<tr> <td>Last run time</td> <td>{{lastRunTime}}</td></tr>
+<tr> <td>Last run duration (s)</td> <td>{{lastRunDuration}}</td></tr>
+<tr> <td>Last run size</td> <td>{{lastRunSize}}</td></tr>
+<tr> <td>Last run sent</td> <td>{{lastRunSent}}</td></tr>
+<tr> <td>Next run time</td> <td>{{nextRunTime}}</td></tr>
+</table>
+
+<p><em>Launch your own traffic generator from GitHub&nbsp;<a href="https://github.com/tuck1s/sparkpost-traffic-gen">here</a></em></p>
+</html>
