@@ -8,7 +8,7 @@ def getResults():
         with open(resultsFile) as fIn:
             return json.load(fIn)
     except:
-        return 'Not yet running'
+        return ['Not yet running']
 
 # Flask entry points
 @app.route('/', methods=['GET'])
