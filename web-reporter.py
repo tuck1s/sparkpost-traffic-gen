@@ -8,7 +8,7 @@ def getResults():
         with open(resultsFile) as fIn:
             return json.load(fIn)
     except:
-        return {'startedRunning': 'Not yet - check your Heroku Scheduler is set up'}
+        return {'startedRunning': 'Not yet - waiting for scheduled running to begin'}
 
 # Flask entry points
 @app.route('/', methods=['GET'])
@@ -22,6 +22,12 @@ def status_json():
     flaskRes = make_response(json.dumps(getResults()))
     flaskRes.headers['Content-Type'] = 'application/json'
     return flaskRes
+
+import os
+@app.route('/test', methods=['GET'])
+def status_test():
+    f = os.getcwd()
+    return f
 
 # Start the app
 if __name__ == "__main__":
