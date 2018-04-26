@@ -33,6 +33,10 @@
       "description": "FROM address belonging to a valid sending domain on your account.  e.g. fred@example.com",
       "required": true
     }
+    "RESULTS_KEY": {
+      "description": "A unique value, used to keep results published in your Redis instance separate",
+      "generator": "secret"
+    }
   },
   "addons": [
     "scheduler",
