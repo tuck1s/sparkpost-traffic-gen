@@ -22,11 +22,22 @@ def setResults(res):
     rkey = 'sparkpost-traffic-gen:' + os.getenv('RESULTS_KEY', default='0000')
     return r.set(rkey, res)
 
+# read config from env vars, where present
+def getConfig():
+    return {
+        'sparkpost_host':           os.getenv('SPARKPOST_HOST', 'https://api.sparkpost.com'),
+        'messages_per_minute_low':  os.getenv('MESSAGES_PER_MINUTE_LOW'),
+        'messages_per_minute_high': os.getenv('MESSAGES_PER_MINUTE_HIGH'),
+        'from_email':               os.getenv('FROM_EMAIL')
+    }
+
 # Flask entry points
 @app.route('/', methods=['GET'])
 def status_html():
-    r = getResults()
-    return render_template('index.html', **r)               # pass in dict as named params to template substitutions
+    r = getConfig()
+    r.update(getResults())
+    # pass in merged dict as named params to template substitutions
+    return render_template('index.html', **r)
 
 # This entry point returns JSON-format report on the traffic generator
 @app.route('/json', methods=['GET'])

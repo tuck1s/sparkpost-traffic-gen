@@ -189,10 +189,6 @@ endTime = time.time()
 runTime = endTime - startTime
 print('Done in {0:.1f}s.'.format(runTime))
 res.update( {
-    'sparkPostHost': sp.base_uri.rstrip('/api/v1'),             # show back to user in format they entered
-    'msgPerMinLow': msgPerMinLow,
-    'msgPerMinHigh': msgPerMinHigh,
-    'fromEmail': fromEmail,
     'lastRunTime': timeStr(startTime),
     'lastRunDuration': round(runTime, 3),
     'lastRunSize': thisRunSize,
