@@ -1,22 +1,23 @@
 import glob
 
-import redis, json, platform
+import os, redis, json
 from flask import Flask, make_response, render_template
 app = Flask(__name__)
-resultsFile = 'results.json'
 
 def getResults():
-    try:
-        with open(resultsFile) as fIn:
-            return json.load(fIn)
-    except:
+    redisUrl = os.getenv('REDIS_URL', default='localhost')  # Env var is set by Heroku; will be unset when local
+    r = redis.from_url(redisUrl, socket_timeout=5)
+    res = r.get('results')
+    if res:
+        return json.loads(res)
+    else:
         return {'startedRunning': 'Not yet - waiting for scheduled running to begin'}
 
 # Flask entry points
 @app.route('/', methods=['GET'])
 def status_html():
     r = getResults()
-    return render_template('index.html', **r, name='fred')
+    return render_template('index.html', **r)           # pass in dict as named params to template substitutions
 
 # This entry point returns JSON-format report on the traffic generator
 @app.route('/json', methods=['GET'])
@@ -24,20 +25,6 @@ def status_json():
     flaskRes = make_response(json.dumps(getResults()))
     flaskRes.headers['Content-Type'] = 'application/json'
     return flaskRes
-
-import os, subprocess
-@app.route('/test', methods=['GET'])
-def status_test():
-    f = os.getcwd()
-    l = subprocess.run(['ls', '-l'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-    l = l.replace('\n', '<br>\n')
-    try:
-        with app.open_resource(resultsFile) as fIn:
-            t = fIn.read().decode('utf-8')
-    except Exception as e:
-        t = str(e)
-
-    return '<pre>' + f + '<br><br>' + l + '<br><br>' + t + '</pre>'
 
 # Start the app
 if __name__ == "__main__":

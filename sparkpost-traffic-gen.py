@@ -6,8 +6,9 @@
 # Configurable traffic volume per minute
 #
 # Can be run periodically via Heroku Scheduler on free dynos
+# Uses redis to communicate results to web-reporter
 #
-import random, os, time, json
+import random, os, time, json, redis
 from sparkpost import SparkPost
 from sparkpost.exceptions import SparkPostAPIException
 from datetime import datetime, timezone
@@ -178,7 +179,7 @@ for i in range(0, thisRunSize):
 if len(recipients) > 0:                         # Send residual batch
     countSent += sendRandomCampaign(sp, recipients)
 
-# write out results
+# write out results to console and to redis
 endTime = time.time()
 runTime = endTime - startTime
 print('Done in {0:.1f}s.'.format(runTime))
@@ -190,5 +191,8 @@ res.update( {
     'nextRunTime': timeStr(startTime + 60 *sendInterval)
 })
 res['totalSentVolume'] += thisRunSize
-with open(resultsFile, 'w') as fOut:
-    json.dump(res, fOut)
+
+redisUrl = os.getenv('REDIS_URL', default='localhost')          # Env var is set by Heroku; will be unset when local
+r = redis.from_url(redisUrl, socket_timeout = 5)
+if r.set('results', json.dumps(res)):
+    print('Results written to redis: ', redisUrl)
