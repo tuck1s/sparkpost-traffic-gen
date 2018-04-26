@@ -87,10 +87,10 @@ def sendToRecips(sp, recipBatch, sendObj):
             print(res)
         else:
             print('OK - in', round(endT - startT, 3), 'seconds')
-        return res['total_accepted_recipients']
+        return res['total_accepted_recipients'], ''
     except SparkPostAPIException as err:
         print('error code', err.status, ':', err.errors)
-        return 0
+        return 0, str(err.errors)
 
 def sendRandomCampaign(sp, recipients):
     campaign, subject, htmlBody = randomContents()
@@ -173,13 +173,20 @@ thisRunSize = int(random.uniform(msgPerMinLow * sendInterval, msgPerMinHigh * se
 print('Sending to', thisRunSize, 'recipients')
 recipients = []
 countSent = 0
+anyError = ''
 for i in range(0, thisRunSize):
     recipients.append(randomRecip())
     if len(recipients) >= batchSize:
-        countSent += sendRandomCampaign(sp, recipients)
+        c, err = sendRandomCampaign(sp, recipients)
+        countSent += c
+        if err:
+            anyError = err                      # remember any error codes seen
         recipients=[]
 if len(recipients) > 0:                         # Send residual batch
-    countSent += sendRandomCampaign(sp, recipients)
+    c, err = sendRandomCampaign(sp, recipients)
+    countSent += c
+    if err:
+        anyError = err                          # remember any error codes seen
 
 # write out results to console and to redis
 endTime = time.time()
@@ -190,6 +197,7 @@ res.update( {
     'lastRunDuration': round(runTime, 3),
     'lastRunSize': thisRunSize,
     'lastRunSent': countSent,
+    'lastRunError': anyError,
     'nextRunTime': timeStr(startTime + 60 *sendInterval)
 })
 res['totalSentVolume'] += thisRunSize
