@@ -161,13 +161,10 @@ sp = SparkPost(api_key = apiKey, base_uri = host)
 print('Opened connection to', host)
 
 startTime = time.time()                                         # measure run time
-
-try:
-    with open(resultsFile) as fIn:
-        res = json.load(fIn)                                    # read back results from previous run (if any)
-except:
+res = getResults()                                              # read back results from previous run (if any)
+if not res:
     res = {
-        'startedRunning': timeStr(startTime),
+        'startedRunning': timeStr(startTime),                   # this is the first run - initialise
         'totalSentVolume': 0
     }
 

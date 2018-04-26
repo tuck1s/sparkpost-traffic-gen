@@ -1,7 +1,7 @@
 import glob
 
 import os, redis, json
-from flask import Flask, make_response, render_template
+from flask import Flask, make_response, render_template, request
 app = Flask(__name__)
 
 # Access to Redis data
@@ -13,7 +13,7 @@ def getResults():
     if res:
         return json.loads(res)
     else:
-        return {'startedRunning': 'Not yet - waiting for scheduled running to begin'}
+        return {}
 
 # returns True if data written back to Redis OK
 def setResults(res):
@@ -34,15 +34,19 @@ def getConfig():
 # Flask entry points
 @app.route('/', methods=['GET'])
 def status_html():
-    r = getConfig()
-    r.update(getResults())
+    r = getResults()
+    if not r:                                               # empty results - show helpful message
+        r['startedRunning'] = 'Not yet - waiting for scheduled running to begin'
+    r.update(getConfig())
     # pass in merged dict as named params to template substitutions
-    return render_template('index.html', **r)
+    return render_template('index.html', **r, jsonUrl=request.url+'json')
 
 # This entry point returns JSON-format report on the traffic generator
 @app.route('/json', methods=['GET'])
 def status_json():
-    flaskRes = make_response(json.dumps(getResults()))
+    r = getResults()
+    r.update(getConfig())
+    flaskRes = make_response(json.dumps(r))
     flaskRes.headers['Content-Type'] = 'application/json'
     return flaskRes
 
