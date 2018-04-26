@@ -1,5 +1,9 @@
-import glob
-
+#!/usr/bin/env python3
+#
+# Simple SparkPost Traffic Generator
+#
+# Web reporting and access functions for shared data held in Redis
+#
 import os, redis, json
 from flask import Flask, make_response, render_template, request
 app = Flask(__name__)

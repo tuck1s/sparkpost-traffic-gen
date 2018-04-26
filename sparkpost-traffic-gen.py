@@ -6,9 +6,9 @@
 # Configurable traffic volume per minute
 #
 # Can be run periodically via Heroku Scheduler on free dynos
-# Uses redis to communicate results to web-reporter
+# Uses redis to communicate results to webReporter
 #
-import random, os, time, json, redis
+import random, os, time, json
 from sparkpost import SparkPost
 from sparkpost.exceptions import SparkPostAPIException
 from datetime import datetime, timezone
@@ -89,8 +89,9 @@ def sendToRecips(sp, recipBatch, sendObj):
             print('OK - in', round(endT - startT, 3), 'seconds')
         return res['total_accepted_recipients'], ''
     except SparkPostAPIException as err:
-        print('error code', err.status, ':', err.errors)
-        return 0, str(err.errors)
+        errMsg = 'error code ' + str(err.status) + ' : ' + str(err.errors)
+        print(errMsg)
+        return 0, errMsg
 
 def sendRandomCampaign(sp, recipients):
     campaign, subject, htmlBody = randomContents()

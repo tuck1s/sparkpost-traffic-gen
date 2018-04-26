@@ -40,4 +40,13 @@ need to manually configure it:
 
 - Click next to clock icon.  Add New Job.  In command box, type `./sparkpost-traffic-gen.py`
 - Choose Schedule Every 10 Minutes.  Next due time is displayed.
-- To monitor, go to App Settings / More / View Log file
+
+### Monitoring
+
+- Click Open App. Results appear once scheduler has run at least once.  Does _not_ display your API key as it's a public page.
+- For detailed logs, go to App Settings / More / View Log file.
+- A JSON-format reporting endpoint is also available (URL ending in `/json`).
+
+### Changing settings
+
+- While running, you can change values in the Settings / Reveal Config Vars page.  Changes are displayed on Open App screen immediately and affect traffic on the next scheduled run. No need to restart dynos.
