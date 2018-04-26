@@ -12,7 +12,7 @@ import random, os, time, json, redis
 from sparkpost import SparkPost
 from sparkpost.exceptions import SparkPostAPIException
 from datetime import datetime, timezone
-
+from webReporter import getResults, setResults
 # -----------------------------------------------------------------------------------------
 # Configurable recipient domains, recipient substitution data, html clickable link, campaign, subject etc
 # -----------------------------------------------------------------------------------------
@@ -152,6 +152,11 @@ if fromEmail == None:
     print('FROM_EMAIL environment variable not set - stopping.')
     exit(1)
 
+resultsKey = os.getenv('RESULTS_KEY')
+if resultsKey == None:
+    print('RESULTS_KEY environment variable not set - stopping.')
+    exit(1)
+
 sp = SparkPost(api_key = apiKey, base_uri = host)
 print('Opened connection to', host)
 
@@ -184,6 +189,10 @@ endTime = time.time()
 runTime = endTime - startTime
 print('Done in {0:.1f}s.'.format(runTime))
 res.update( {
+    'sparkPostHost': sp.base_uri.rstrip('/api/v1'),             # show back to user in format they entered
+    'msgPerMinLow': msgPerMinLow,
+    'msgPerMinHigh': msgPerMinHigh,
+    'fromEmail': fromEmail,
     'lastRunTime': timeStr(startTime),
     'lastRunDuration': round(runTime, 3),
     'lastRunSize': thisRunSize,
@@ -192,7 +201,5 @@ res.update( {
 })
 res['totalSentVolume'] += thisRunSize
 
-redisUrl = os.getenv('REDIS_URL', default='localhost')          # Env var is set by Heroku; will be unset when local
-r = redis.from_url(redisUrl, socket_timeout = 5)
-if r.set('results', json.dumps(res)):
-    print('Results written to redis: ', redisUrl)
+if setResults(json.dumps(res)):
+    print('Results written to redis')
