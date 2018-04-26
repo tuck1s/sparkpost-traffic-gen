@@ -1,1 +1,1 @@
-web: gunicorn web-reporter:app
+web: gunicorn webReporter:app
