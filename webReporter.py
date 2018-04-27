@@ -5,7 +5,7 @@
 # Web reporting and access functions for shared data held in Redis
 #
 import os, redis, json
-from flask import Flask, make_response, render_template, request
+from flask import Flask, make_response, render_template, request, send_file
 app = Flask(__name__)
 
 # Access to Redis data
@@ -53,6 +53,10 @@ def status_json():
     flaskRes = make_response(json.dumps(r))
     flaskRes.headers['Content-Type'] = 'application/json'
     return flaskRes
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_file('favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 # Start the app
 if __name__ == "__main__":
