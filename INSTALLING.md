@@ -20,24 +20,30 @@ generator (e.g. to generate traffic from different subaccounts), the app uses a 
 
 ## Amazon EC2 Linux
 
-`python3` (which also installs `pip`), git.  Upgrade pip to latest version
+Get an up-to-date Python interpreter (and `pip`) and git.  
 ```
 sudo su -
-yum install -y python36 git
+yum install -y python36 python36-pip git
 pip install --upgrade pip
 ```
 
-Set path to `pip` by editing .profile and adding
+Set path for `pip` by editing .profile and adding
 ```
 export PATH=/usr/local/bin:$PATH
 ```
 
-Web application server and redis-py library, SparkPost library:
+Upgrade pip to latest version
+
+```
+pip install --upgrade pip
+```
+
+Get web application server and redis-py library, SparkPost library:
 ```
 pip install gunicorn redis sparkpost flask
 ```
 
-Install redis https://redis.io/topics/quickstart
+Get redis - https://redis.io/topics/quickstart
 ```
 yum install -y gcc
 wget http://download.redis.io/redis-stable.tar.gz
@@ -49,16 +55,15 @@ make install
 yum install -y tcl
 make test
 ```
-Follow the latter stages of this guide:
-https://medium.com/@andrewcbass/install-redis-v3-2-on-aws-ec2-instance-93259d40a3ce
+If using EC2 Linux, the later stages of [this guide](https://medium.com/@andrewcbass/install-redis-v3-2-on-aws-ec2-instance-93259d40a3ce)
+will help.
 
 Check you've started the `redis` service using this command. It should say PONG back.
-
 ```
 redis-cli ping
 ```
 
-You can now leave sudo privilege.  Get the traffic generator, and check it runs
+You can now leave root privilege.  Get the traffic generator, and check it runs:
 ```
 git clone https://github.com/tuck1s/sparkpost-traffic-gen.git
 cd sparkpost-traffic-gen
