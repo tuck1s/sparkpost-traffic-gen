@@ -110,6 +110,19 @@ def timeStr(t):
     utc = datetime.fromtimestamp(t, timezone.utc)
     return datetime.isoformat(utc, sep='T', timespec='seconds')
 
+def stripEnd(h, s):
+    if h.endswith(s):
+        h = h[:-len(s)]
+    return h
+
+# condense into library-ready form
+def hostCleanup(host):
+    if not host.startswith('https://'):
+        host = 'https://' + host  # Add schema
+    host = stripEnd(host, '/')
+    host = stripEnd(host, '/api/v1')
+    host = stripEnd(host, '/')
+    return host
 # -----------------------------------------------------------------------------
 # Main code
 # -----------------------------------------------------------------------------
@@ -139,11 +152,7 @@ if apiKey == None:
     print('SPARKPOST_API_KEY environment variable not set - stopping.')
     exit(1)
 
-host = os.getenv('SPARKPOST_HOST', default='api.sparkpost.com')
-if not host.startswith('https://'):
-    host = 'https://' + host                    # Add schema
-if host.endswith('/'):
-    host = host[:-1]                            # Strip /
+host = hostCleanup(os.getenv('SPARKPOST_HOST', default='api.sparkpost.com'))
 
 fromEmail = os.getenv('FROM_EMAIL')
 if fromEmail == None:

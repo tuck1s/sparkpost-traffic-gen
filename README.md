@@ -3,7 +3,27 @@
 A simple app, which can easily be deployed to Heroku, to generate random traffic through your SparkPost
 account towards the "bouncy sink".  Note that all sent messages count towards your account usage.
 
-Environment variables (which are configured via Heroku's start dialog):
+## Deploying to Heroku
+
+Pre-requisites: a Heroku account, verified via credit card (free tier is fine).  Click here:
+
+<a href="https://heroku.com/deploy">
+  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy" target="_blank">
+</a>
+<br>
+
+- Choose a name for your Heroku app (must start with a lowercase letter)
+- Enter your values for the environment variables, below
+- After a short time Heroku should report **`Build finished`**
+- Configure the scheduler:
+    - From your app overview, click next to clock icon.  Add New Job.  In command box, type `./sparkpost-traffic-gen.py`
+    - Choose Schedule Every 10 Minutes.  Next due time is displayed.
+ 
+<img src="doc-img/configure-scheduler.png"/>
+
+- Open the app to view metrics on your generator.
+
+### Environment variables (configured via Heroku's start dialog):
 
 ```txt
 SPARKPOST_HOST (optional)
@@ -22,40 +42,26 @@ FROM_EMAIL
     FROM address belonging to a valid sending domain on your account.  e.g. fred@example.com
 ```
 
-## Deploying to Heroku
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
-- Enter values for the above environment variables
-- After a short time Heroku should report `Build finished`
-
-### Running periodically with the Heroku Scheduler
-
-This app formerly used `time.sleep()` for built-in scheduling, but that doesn't play nicely with
-Heroku's [free dyno hours](https://devcenter.heroku.com/articles/free-dyno-hours#consuming-hours) allowance.
-The worker-thread gets killed by Heroku after 30 minutes.
-
-Instead, this project installs the addon [Heroku Scheduler](https://devcenter.heroku.com/articles/scheduler), but you
-need to manually configure it:
-
-- Click next to clock icon.  Add New Job.  In command box, type `./sparkpost-traffic-gen.py`
-- Choose Schedule Every 10 Minutes.  Next due time is displayed.
-
-### Traffic handling
+## Traffic handling
 The `bouncy-sink` recipient domain responds to traffic according to a statistical model:
 
 <img src="doc-img/bouncy-sink-statistical-model.svg"/>
 
+## Monitoring
 
-### Monitoring
+Click Open App (top right). Results appear once scheduler has run at least once.  Does _not_ display your API key as it's a public page.  You should see a screen below.
 
-- Click Open App. Results appear once scheduler has run at least once.  Does _not_ display your API key as it's a public page.
-- For detailed logs, go to App Settings / More / View Log file.
-- A JSON-format reporting endpoint is also available (URL ending in `/json`).
+For detailed logs, go to App Settings / More / View Log file.
 
-### Changing settings
+A JSON-format reporting endpoint is also available - see app main screen for a link (URL ending in `/json`).
 
-- While running, you can change values in the Settings / Reveal Config Vars page.  Changes are displayed on Open App screen immediately and affect traffic on the next scheduled run. No need to restart dynos.
+<img src="doc-img/bouncy-sink-app-metrics.png"/>
+
+## Changing settings, stopping
+
+While running, you can change values in the Settings / Reveal Config Vars page.  Changes are displayed on Open App screen immediately and affect traffic on the next scheduled run. No need to restart dynos.
+
+To stop traffic, go to your app overview, select the Scheduler (clock icon), select "Remove".
 
 ### Hosting options
 
@@ -70,6 +76,8 @@ generator (e.g. to generate traffic from different subaccounts), the app uses a 
 
 The `webReporter.py` app depends on the Flask framework (and Gunicorn, or other suitable app server). You could consider this
 part optional if you are self-hosting.
+
+Install instructions for other platforms will be added to [CONFIGURING.md](CONFIGURING.md)
 
 ### Changing settings in the code
 
