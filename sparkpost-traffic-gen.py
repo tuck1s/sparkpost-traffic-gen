@@ -13,9 +13,11 @@ from sparkpost import SparkPost
 from sparkpost.exceptions import SparkPostAPIException
 from datetime import datetime, timezone
 from webReporter import getResults, setResults
+
 # -----------------------------------------------------------------------------------------
 # Configurable recipient domains, recipient substitution data, html clickable link, campaign, subject etc
 # -----------------------------------------------------------------------------------------
+
 recipDomains = [
     "not-gmail.com.bouncy-sink.trymsys.net",
     "not-yahoo.com.bouncy-sink.trymsys.net",
