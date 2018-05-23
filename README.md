@@ -41,6 +41,12 @@ need to manually configure it:
 - Click next to clock icon.  Add New Job.  In command box, type `./sparkpost-traffic-gen.py`
 - Choose Schedule Every 10 Minutes.  Next due time is displayed.
 
+### Traffic handling
+The `bouncy-sink` recipient domain responds to traffic according to a statistical model:
+
+<img src="doc-img/bouncy-sink-statistical-model.svg"/>
+
+
 ### Monitoring
 
 - Click Open App. Results appear once scheduler has run at least once.  Does _not_ display your API key as it's a public page.
@@ -50,3 +56,33 @@ need to manually configure it:
 ### Changing settings
 
 - While running, you can change values in the Settings / Reveal Config Vars page.  Changes are displayed on Open App screen immediately and affect traffic on the next scheduled run. No need to restart dynos.
+
+### Hosting options
+
+The worker thread code `sparkpost-traffic-gen.py`is a simple Python script that could be hosted on any platform.
+
+Heroku runs the worker thread and web thread in identical-looking, but separate, non-communicating filesystem spaces.
+Temp files therefore don't work to communicate metrics from worker to web thread.
+Instead, [Redis](https://redis.io/topics/quickstart) is used to communicate metrics to the `webReporter.py` app.
+
+Your Heroku account provides you with a single Redis namespace. Because you might want to run more than one traffic
+generator (e.g. to generate traffic from different subaccounts), the app uses a randomised `RESULTS_KEY` environment var.
+
+The `webReporter.py` app depends on the Flask framework (and Gunicorn, or other suitable app server). You could consider this
+part optional if you are self-hosting.
+
+### Changing settings in the code
+
+If you wish to generate traffic going to some place other than the `bouncy-sink`, the code can easily be changed
+[here](https://github.com/tuck1s/sparkpost-traffic-gen/blob/8b5761e0e52e94fe2ca76de654aef87c1d21050d/sparkpost-traffic-gen.py#L19).
+Note that sending traffic to real ISP domains with fake addresses is likely to harm your [reputation](https://www.sparkpost.com/blog/email-reputation-matters/) - use with care.
+
+You can also easily customise
+- the metadata included with each recipient (Cities, Genders)
+- The target link that will be clicked by the sink
+- Campaign names
+- Subject lines
+- Link names (that appear in the SparkPost Engagement report, for example)
+- `To` address prefix and name
+- Default send interval that your scheduler is running to (used to translate the per-minute env var settings into numbers)
+- API call batch size (chosen for efficiency)

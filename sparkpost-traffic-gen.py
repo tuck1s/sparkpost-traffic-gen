@@ -17,9 +17,6 @@ from webReporter import getResults, setResults
 # Configurable recipient domains, recipient substitution data, html clickable link, campaign, subject etc
 # -----------------------------------------------------------------------------------------
 recipDomains = [
-    #"fbl.bouncy-sink.trymsys.net",
-    #"oob.bouncy-sink.trymsys.net",
-    #"openclick.bouncy-sink.trymsys.net",
     "not-gmail.com.bouncy-sink.trymsys.net",
     "not-yahoo.com.bouncy-sink.trymsys.net",
     "not-yahoo.co.uk.bouncy-sink.trymsys.net",
@@ -44,12 +41,12 @@ content = [
     {'campaign': 'sparkpost-traffic-gen Holiday_Bargains', 'subject': 'Holiday bargains', 'linkname': 'Holiday Bargains'}
 ]
 
-ToAddrPrefix = 'fakespark+'                         # prefix - random digits are appended to this
+ToAddrPrefix = 'test+'                              # prefix - random digits are appended to this
 ToName = 'traffic-generator'
 sendInterval = 10                                   # minutes
 batchSize = 2000                                    # efficient transmission API call batch size
-resultsFile = 'results.json'
-# -----------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 def randomRecip():
     numDigits = 20                                  # Number of random local-part digits to generate
     localpartnum = random.randrange(0, 10**numDigits)
@@ -113,9 +110,9 @@ def timeStr(t):
     utc = datetime.fromtimestamp(t, timezone.utc)
     return datetime.isoformat(utc, sep='T', timespec='seconds')
 
-# -----------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Main code
-# -----------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 msgPerMinLow = os.getenv('MESSAGES_PER_MINUTE_LOW', '')
 if msgPerMinLow.isnumeric():
