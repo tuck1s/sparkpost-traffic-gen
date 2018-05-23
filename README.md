@@ -12,14 +12,20 @@ Pre-requisites: a Heroku account, verified via credit card (free tier is fine). 
 </a>
 <br>
 
-- Choose a name for your Heroku app (must start with a lowercase letter)
-- Enter your values for the environment variables, below
+- Choose a name for your Heroku app (must start with a lowercase letter).
+
+- Enter your values for the environment variables.  You'll need a valid SparkPost API key and sending domain.
+
 - After a short time Heroku should report **`Build finished`**
+
 - Configure the scheduler:
-    - From your app overview, click next to clock icon.  Add New Job.  In command box, type `./sparkpost-traffic-gen.py`
+    - From your app overview, click next to clock icon:
+    <img src="doc-img/configure-scheduler.png"/>
+    
+    - Add New Job.  In command box, type `./sparkpost-traffic-gen.py`
+    
     - Choose Schedule Every 10 Minutes.  Next due time is displayed.
  
-<img src="doc-img/configure-scheduler.png"/>
 
 - Open the app to view metrics on your generator.
 
