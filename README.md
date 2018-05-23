@@ -69,26 +69,10 @@ While running, you can change values in the Settings / Reveal Config Vars page. 
 
 To stop traffic, go to your app overview, select the Scheduler (clock icon), select "Remove".
 
-### Hosting options
-
-The worker thread code `sparkpost-traffic-gen.py`is a simple Python script that could be hosted on any platform.
-
-Heroku runs the worker thread and web thread in identical-looking, but separate, non-communicating filesystem spaces.
-Temp files therefore don't work to communicate metrics from worker to web thread.
-Instead, [Redis](https://redis.io/topics/quickstart) is used to communicate metrics to the `webReporter.py` app.
-
-Your Heroku account provides you with a single Redis namespace. Because you might want to run more than one traffic
-generator (e.g. to generate traffic from different subaccounts), the app uses a randomised `RESULTS_KEY` environment var.
-
-The `webReporter.py` app depends on the Flask framework (and Gunicorn, or other suitable app server). You could consider this
-part optional if you are self-hosting.
-
-Install instructions for other platforms will be added to [CONFIGURING.md](CONFIGURING.md)
-
 ### Changing settings in the code
 
-If you wish to generate traffic going to some place other than the `bouncy-sink`, the code can easily be changed
-[here](https://github.com/tuck1s/sparkpost-traffic-gen/blob/8b5761e0e52e94fe2ca76de654aef87c1d21050d/sparkpost-traffic-gen.py#L19).
+If you wish to generate traffic going to some place other than the `bouncy-sink`, the code can easily be changed. 
+
 Note that sending traffic to real ISP domains with fake addresses is likely to harm your [reputation](https://www.sparkpost.com/blog/email-reputation-matters/) - use with care.
 
 You can also easily customise
@@ -100,3 +84,8 @@ You can also easily customise
 - `To` address prefix and name
 - Default send interval that your scheduler is running to (used to translate the per-minute env var settings into numbers)
 - API call batch size (chosen for efficiency)
+
+# See also
+Internal documentation, and install instructions for other platforms in  [INSTALLING.md](INSTALLING.md)
+
+How to contribute to this project: [CONTRIBUTING.md](CONTRIBUTING.md)
