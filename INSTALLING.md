@@ -21,7 +21,11 @@ generator (e.g. to generate traffic from different subaccounts), the app uses a 
 ## Amazon EC2 Linux
 
 Start an instance (t2.micro size is fine). Allow ssh and http in the instance's security group.
-**Caveat**: these instructions set up a plain (http) server for your results page, which will be visible to the world.
+
+**Caveats**:
+- These instructions set up a plain (http) server for your results page, which will be visible to the world
+- Check your firewall settings!
+- These instructions serve port 80 directly via the `Gunicorn` app server. Long-term setups should follow the advice to use a proxy - see http://docs.gunicorn.org/en/stable/deploy.html?highlight=nginx
 
 Get an up-to-date Python interpreter (and `pip`) and git.  
 ```
@@ -94,7 +98,7 @@ chmod +x tg.sh
 Start the `gunicorn` web application server to run in the background (will survive logout, but not a reboot).
 Bind onto all interfaces, port 80
 ```
-sudo -E /usr/local/bin/gunicorn webReporter:app --bind=0.0.0.0:80 &
+sudo -E /usr/local/bin/gunicorn webReporter:app --bind=0.0.0.0:80 --access-logfile gunicorn.log --daemon
 ```
 
 Open your results page in a browser (using http, not https at this stage). You should see a page appear. If not, then
@@ -123,13 +127,19 @@ Add the following line to the end of your `tg.sh`:
 */10 * * * * cd sparkpost-traffic-gen; bash tg.sh
 ```
 
-Monitor your web page, and optionally monitor the logfile. If SparkPost returns errors, these are displayed.  For example, you might see
+Monitor your web page, and optionally monitor the logfile. If SparkPost returns errors, these are displayed.  For example, you might see the following:
 ```
 Opened connection to https://api.eu.sparkpost.com
 Sending to 6 recipients
   To     6 recipients | campaign "sparkpost-traffic-gen Newsletter" | error code 420 : ['Exceed Sending Limit (daily) Code: 2102 Description: none \n']
 Done in 0.6s.
 Results written to redis
+```
+
+Gunicorn access logfile looks like:
+```
+82.10.62.100 - - [24/May/2018:21:20:58 +0000] "GET / HTTP/1.1" 200 1864 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"
+82.10.62.100 - - [24/May/2018:21:20:59 +0000] "GET /favicon.ico HTTP/1.1" 200 - "http://54.202.195.231/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"
 ```
 
 TODO:
@@ -139,5 +149,9 @@ TODO:
 Coming soon
 
 ## Serverless.com
+
+Coming soon
+
+## Azure Functions
 
 Coming soon
