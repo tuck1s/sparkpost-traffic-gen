@@ -89,16 +89,17 @@ export FROM_EMAIL=test.ec2@email-eu.thetucks.com
 export RESULTS_KEY=abcd
 ```
 
-Load the variables into your environment:
 ```
 chmod +x tg.sh 
-. tg.sh 
 ```
 
+Load the variables into your environment.
 Start the `gunicorn` web application server to run in the background (will survive logout, but not a reboot).
-Bind onto all interfaces, port 80
+Bind onto all interfaces, port 80. The app depends on the `RESULTS_KEY` env var being set, as you start the server, otherwise
+traffic won't show on the status page.
+
 ```
-sudo -E /usr/local/bin/gunicorn webReporter:app --bind=0.0.0.0:80 --access-logfile gunicorn.log --daemon
+. tg.sh; sudo -E /usr/local/bin/gunicorn webReporter:app --bind=0.0.0.0:80 --access-logfile gunicorn.log --daemon
 ```
 
 Open your results page in a browser (using http, not https at this stage). You should see a page appear. If not, then
@@ -119,8 +120,10 @@ Add the following line to the end of your `tg.sh`:
 ./sparkpost-traffic-gen.py >>sparkpost-traffic-gen.log 2>&1
 ```
 
+Run `crontab -e` and add the following:
+```
 #
-# The paths below assume you have a copy of the project installed via git in your home directory, adjust if this is not the case
+# The paths below assume you have a copy of the project installed in the shown directory, adjust if this is not the case
 #
 # This executes the script at every 10th minute
 
@@ -141,8 +144,6 @@ Gunicorn access logfile looks like:
 82.10.62.100 - - [24/May/2018:21:20:58 +0000] "GET / HTTP/1.1" 200 1864 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"
 82.10.62.100 - - [24/May/2018:21:20:59 +0000] "GET /favicon.ico HTTP/1.1" 200 - "http://54.202.195.231/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"
 ```
-
-TODO:
 
 ## AWS Lambda
 
