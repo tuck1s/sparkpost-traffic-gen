@@ -5,16 +5,47 @@ The worker thread code `sparkpost-traffic-gen.py`is a simple Python script that 
 The `webReporter.py` app depends on the Flask framework (and Gunicorn, or other suitable app server). You could consider this
 part optional if you are self-hosting.
 
-# Heroku
+# Heroku command-line deployment
 
-This is done for you if you use the "deploy" button. You can also manually install from a repo fork using the Heroku CLI.
+This is done for you if you use the "deploy" button. You can also manually install from a repo fork using the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli):
+
+```
+brew install heroku/brew/heroku         # only if you don't already have the CLI
+heroku login
+
+git clone https://github.com/tuck1s/sparkpost-traffic-gen.git       # this project
+cd sparkpost-traffic-gen
+heroku apps:create my-traffic-gen
+heroku git:remote -a my-traffic-gen
+git push heroku master
+
+heroku addons:create scheduler
+heroku addons:create heroku-redis
+```
+Now set the remote environment variables for the Heroku app, for example in a bash script.
+You can skip setting SPARKPOST_HOST when using the standard US service.
+```
+#!/bin/bash
+heroku config:set SPARKPOST_API_KEY=<<< YOUR API KEY HERE >>>\
+MESSAGES_PER_MINUTE_LOW=0 \
+MESSAGES_PER_MINUTE_HIGH=1 \
+FROM_EMAIL=test@yourdomain.com \
+SPARKPOST_HOST=api.eu.sparkpost.com/api/v1/ \
+RESULTS_KEY=$RANDOM$RANDOM$RANDOM$RANDOM
+```
+Run your script. then you'll need to open and configure the scheduler as usual
+```
+heroku addons:open SCHEDULER
+```
+
+### Why redis is used for worker/web communication
 
 Heroku runs the worker thread and web thread in identical-looking, but separate, non-communicating filesystem spaces.
 Temp files therefore don't work to communicate metrics from worker to web thread.
 Instead, [Redis](https://redis.io/topics/quickstart) is used to communicate metrics to the `webReporter.py` app.
 
 Your Heroku account provides you with a single Redis namespace. Because you might want to run more than one traffic
-generator (e.g. to generate traffic from different subaccounts), the app uses a randomised `RESULTS_KEY` environment var.
+generator (e.g. to generate traffic from different subaccounts), the app relies on a randomised `RESULTS_KEY` environment var.
 
 # Other platforms
 
@@ -39,7 +70,6 @@ export PATH=/usr/local/bin:$PATH
 ```
 
 Upgrade pip to latest version
-
 ```
 pip install --upgrade pip
 ```
@@ -77,7 +107,7 @@ cd sparkpost-traffic-gen
 Invalid MESSAGES_PER_MINUTE_LOW setting - must be number 1 to 10000
 ```
 
-Expect an error message as we don't have env vars set up yet.  Now set these up in a shell script, e.g. 
+Expect **an error message** as this stage as we don't have env vars set up yet.<br>Now set these up in a shell script, e.g. 
 `vim tg.sh`
 ```
 #!/bin/bash
@@ -86,24 +116,23 @@ export SPARKPOST_API_KEY=<YOUR API KEY>
 export MESSAGES_PER_MINUTE_LOW=0
 export MESSAGES_PER_MINUTE_HIGH=1
 export FROM_EMAIL=test.ec2@email-eu.thetucks.com
-export RESULTS_KEY=abcd
+export RESULTS_KEY=$RANDOM$RANDOM$RANDOM$RANDOM
 ```
-
+then
 ```
 chmod +x tg.sh 
 ```
 
-Load the variables into your environment.
-Start the `gunicorn` web application server to run in the background (will survive logout, but not a reboot).
-Bind onto all interfaces, port 80. The app depends on the `RESULTS_KEY` env var being set, as you start the server, otherwise
-traffic won't show on the status page.
+Start the `gunicorn` web application server to run in the background with thes env vars (will survive logout, but not a reboot).
+Bind onto all interfaces, port 80. The web app depends on the `RESULTS_KEY` env var being set, as you start the server, otherwise
+traffic won't show on the status page!
 
 ```
 . tg.sh; sudo -E /usr/local/bin/gunicorn webReporter:app --bind=0.0.0.0:80 --access-logfile gunicorn.log --daemon
 ```
 
-Open your results page in a browser (using http, not https at this stage). You should see a page appear. If not, then
-check your firewall settings and `iptables` settings.
+Open results page in a browser (using http). You should see a page appear. If not, then
+check your EC2 security group (firewall) settings and `iptables` settings.
 
 Check the generator runs interactively:
 ```
@@ -130,7 +159,8 @@ Run `crontab -e` and add the following:
 */10 * * * * cd sparkpost-traffic-gen; bash tg.sh
 ```
 
-Monitor your web page, and optionally monitor the logfile. If SparkPost returns errors, these are displayed.  For example, you might see the following:
+Monitor your web page, and the logfile. If SparkPost returns errors, these are displayed.  For example, you might see the following, if your account
+limit is reached:
 ```
 Opened connection to https://api.eu.sparkpost.com
 Sending to 6 recipients
