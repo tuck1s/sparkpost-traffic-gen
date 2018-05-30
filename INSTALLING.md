@@ -91,8 +91,8 @@ make install
 yum install -y tcl
 make test
 ```
-If using EC2 Linux, the later stages of [this guide](https://medium.com/@andrewcbass/install-redis-v3-2-on-aws-ec2-instance-93259d40a3ce)
-will help.
+If using EC2 Linux,[this guide](https://medium.com/@andrewcbass/install-redis-v3-2-on-aws-ec2-instance-93259d40a3ce)
+will help - start from the "Make directories & copy files" stage onwards.
 
 Check you've started the `redis` service using this command. It should say PONG back.
 ```
