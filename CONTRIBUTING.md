@@ -1,6 +1,6 @@
 # Contributing to this project
 
-These are unofficial tools, rather than officially supported SparkPost features, but we’ve tried to make them solid, easy to use, and you can change them.
+These are unofficial tools, rather than officially supported product features, but we’ve tried to make them solid, easy to use, and you can change them.
 
 ## Prerequisite to contribution
 
@@ -16,7 +16,7 @@ Please review the following checklist before submitting a new issue.
   1. Programming language and version
   1. Exception, error or issue summary
   1. Recreation steps or use case summary
-  1. Example data (if available, *DO NOT INCLUDE YOUR SPARKPOST API KEY OR ANY PERSONAL DATA*)
+  1. Example data (if available, *DO NOT INCLUDE YOUR  API KEY OR ANY PERSONAL DATA*)
   1. Expected result or desired functionality
   1. Any extra information you’d like to provide
 1. Please give your issue a meaningful name
