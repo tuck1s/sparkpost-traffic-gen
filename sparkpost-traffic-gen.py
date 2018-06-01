@@ -65,10 +65,22 @@ def randomRecip():
     }
     return recip
 
+htmlTemplate = \
+'''<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>test mail</title>
+  </head>
+  <body>
+    Click <a href="{}" data-msys-linkname="{}">{}</a>
+  </body>
+</html>'''
+
 # Contents include a valid http(s) link with custom link name
 def randomContents():
     c = random.choice(content)
-    htmlBody = 'Click <a href="'+htmlLink+'" data-msys-linkname="' + c['linkname'] + '">' + htmlLink + '</a>'
+    htmlBody = htmlTemplate.format(htmlLink, c['linkname'], htmlLink)
     return c['campaign'], c['subject'], htmlBody
 
 # Inject the messages into SparkPost for a batch of recipients, using the specified transmission parameters
