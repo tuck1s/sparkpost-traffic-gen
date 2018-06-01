@@ -221,7 +221,7 @@ res.update( {
     'lastRunError': anyError,
     'nextRunTime': timeStr(startTime + 60 *sendInterval)
 })
-res['totalSentVolume'] += thisRunSize
+res['totalSentVolume'] += countSent
 
 if setResults(json.dumps(res)):
     print('Results written to redis')
