@@ -11,6 +11,8 @@ python:
 install:
   - pip install pipenv
   - pipenv install
+services:
+  - redis-server
 script:
   - pipenv run ./sparkpost-traffic-gen.py
 branches:
