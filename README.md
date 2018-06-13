@@ -1,4 +1,10 @@
+<a href="https://www.sparkpost.com"><img src="https://www.sparkpost.com/sites/default/files/attachments/SparkPost_Logo_2-Color_Gray-Orange_RGB.svg" width="200px"/></a>
+
+[Sign up](https://app.sparkpost.com/join?plan=free-0817?src=Social%20Media&sfdcid=70160000000pqBb&pc=GitHubSignUp&utm_source=github&utm_medium=social-media&utm_campaign=github&utm_content=sign-up) for a SparkPost account and visit our [Developer Hub](https://developers.sparkpost.com) for even more content.
+
 # SparkPost Traffic Generator
+
+[![Build Status](https://travis-ci.org/tuck1s/sparkpost-traffic-gen.svg?branch=master)](https://travis-ci.org/tuck1s/sparkpost-traffic-gen)
 
 A simple app, which can easily be deployed to Heroku, to generate random traffic through your SparkPost
 account towards the "bouncy sink".  Note that all sent messages count towards your account usage.
