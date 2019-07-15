@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # Access to Redis data
 def getResults():
-    redisUrl = os.getenv('REDIS_URL', default='localhost')  # Env var is set by Heroku; will be unset when local
+    redisUrl = os.getenv('REDIS_URL', default='redis://localhost:6379')  # Env var is set by Heroku; will be unset when local
     r = redis.from_url(redisUrl, socket_timeout=5)          # shorten timeout so doesn't hang forever
     rkey = 'sparkpost-traffic-gen:' + os.getenv('RESULTS_KEY', default='0000')
     res = r.get(rkey)
@@ -21,7 +21,7 @@ def getResults():
 
 # returns True if data written back to Redis OK
 def setResults(res):
-    redisUrl = os.getenv('REDIS_URL', default='localhost')  # Env var is set by Heroku; will be unset when local
+    redisUrl = os.getenv('REDIS_URL', default='redis://localhost:6379')  # Env var is set by Heroku; will be unset when local
     r = redis.from_url(redisUrl, socket_timeout=5)          # shorten timeout so doesn't hang forever
     rkey = 'sparkpost-traffic-gen:' + os.getenv('RESULTS_KEY', default='0000')
     return r.set(rkey, res)
