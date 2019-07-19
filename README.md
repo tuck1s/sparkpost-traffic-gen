@@ -37,10 +37,7 @@ Pre-requisites: a Heroku account, verified via credit card (free tier is fine). 
 
 ### Environment variables (configured via Heroku's start dialog):
 
-```txt
-SPARKPOST_HOST (optional)
-    The URL of the SparkPost API service you're using. Defaults to https://api.sparkpost.com.
-
+```
 SPARKPOST_API_KEY
     API key on your SparkPost account, with transmission rights.
 
@@ -53,6 +50,19 @@ MESSAGES_PER_MINUTE_HIGH
 FROM_EMAIL
     FROM address belonging to a valid sending domain on your account.  e.g. fred@example.com
 ```
+Optional:
+
+```
+SPARKPOST_HOST
+    The URL of the SparkPost API service you're using. When omitted, defaults to https://api.sparkpost.com.
+
+TRACK_OPENS
+    (True / False), selects whether SparkPost open tracking is active. When omitted, defaults to True.
+
+TRACK_CLICKS
+    (True / False), selects whether SparkPost click tracking is active. When omitted, defaults to True.
+```
+
 
 ## Traffic handling
 The `bouncy-sink` recipient domain responds to traffic according to a statistical model:

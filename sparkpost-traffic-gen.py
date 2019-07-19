@@ -104,15 +104,15 @@ def sendToRecips(sp, recipBatch, sendObj):
         print(errMsg)
         return 0, errMsg
 
-def sendRandomCampaign(sp, recipients):
+def sendRandomCampaign(sp, recipients, trackOpens=True, trackClicks=True):
     campaign, subject, htmlBody = randomContents()
     txObj = {
         'text': 'hello world',
         'html': htmlBody,
         'subject': subject,
         'campaign': campaign,
-        'track_opens':  True,
-        'track_clicks': True,
+        'track_opens':  trackOpens,
+        'track_clicks': trackClicks,
         'from_email': fromEmail,
     }
     if 'api.e.sparkpost.com' in sp.base_uri:                       # SPE demo system needs named ip_pool
@@ -137,6 +137,17 @@ def hostCleanup(host):
     host = stripEnd(host, '/api/v1')
     host = stripEnd(host, '/')
     return host
+
+
+def strToBool(v):
+    s = v.lower()
+    if s in ("yes", "true", "t", "1"):
+        return True
+    elif s in ("no", "false", "f", "0"):
+        return False
+    else:
+        return None
+
 # -----------------------------------------------------------------------------
 # Main code
 # -----------------------------------------------------------------------------
@@ -178,6 +189,16 @@ if resultsKey == None:
     print('RESULTS_KEY environment variable not set - stopping.')
     exit(1)
 
+trackOpens = strToBool(os.getenv('TRACK_OPENS', default='True'))
+if trackOpens == None:
+    print('TRACK_OPENS set to invalid value - should be True or False')
+    exit(1)
+
+trackClicks = strToBool(os.getenv('TRACK_CLICKS', default='True'))
+if trackClicks == None:
+    print('TRACK_CLICKS set to invalid value - should be True or False')
+    exit(1)
+
 sp = SparkPost(api_key = apiKey, base_uri = host)
 print('Opened connection to', host)
 
@@ -191,20 +212,20 @@ if not res:
 
 # Send every n minutes, between low and high traffic rate
 thisRunSize = int(random.uniform(msgPerMinLow * sendInterval, msgPerMinHigh * sendInterval))
-print('Sending to', thisRunSize, 'recipients')
+print('Sending from {} to {} recipients, TRACK_OPENS={}, TRACK_CLICKS={}'.format(fromEmail, thisRunSize, trackOpens, trackClicks))
 recipients = []
 countSent = 0
 anyError = ''
 for i in range(0, thisRunSize):
     recipients.append(randomRecip())
     if len(recipients) >= batchSize:
-        c, err = sendRandomCampaign(sp, recipients)
+        c, err = sendRandomCampaign(sp, recipients, trackOpens=trackOpens, trackClicks=trackClicks)
         countSent += c
         if err:
             anyError = err                      # remember any error codes seen
         recipients=[]
 if len(recipients) > 0:                         # Send residual batch
-    c, err = sendRandomCampaign(sp, recipients)
+    c, err = sendRandomCampaign(sp, recipients, trackOpens=trackOpens, trackClicks=trackClicks)
     countSent += c
     if err:
         anyError = err                          # remember any error codes seen

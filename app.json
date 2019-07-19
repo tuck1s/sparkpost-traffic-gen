@@ -36,6 +36,14 @@
     "RESULTS_KEY": {
       "description": "A unique value, used to keep results published in your Redis instance separate",
       "generator": "secret"
+    },
+    "TRACK_OPENS": {
+      "description": "(True / False), selects whether SparkPost open tracking is active. When omitted, defaults to True.",
+      "required": false
+    },
+    "TRACK_CLICKS": {
+      "description": "(True / False), selects whether SparkPost click tracking is active. When omitted, defaults to True.",
+      "required": false
     }
   },
   "addons": [
